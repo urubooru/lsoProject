@@ -1,0 +1,15 @@
+TODO:
+    Server: Numero di partite da lanciare, timeout sulle partite
+        Generazione mappa migliorata
+        Aggiornamento posizione da un utente, inviagli una mappa locale
+
+    Client: Tutto
+        Connessione al server
+        Registrazione/accesso al server
+        Spostarsi sulla mappa
+        Disconnettersi
+        Vedere lista utenti collegati
+        Visualizzare mappa locale
+        Mappa globale inviata dal server periodicamente
+
+Error handling
