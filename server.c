@@ -1,7 +1,9 @@
+#define _GNU_SOURCE 1
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <arpa/inet.h>
 
 #define WALL 0
 #define PATH 1
@@ -133,6 +135,26 @@ int generateRandomMap(Map mapIn) {
   return 0;
 }
 
+int cleanUpMap(Map mapIn) {
+  //Check for any isolated PATH cells and convert them to WALL
+  for (int i = 0; i < SIZE; i++) {
+    for (int j = 0; j < SIZE; j++) {
+      if (mapIn.map[i][j] == PATH) {
+        int wallCount = 0;
+        // Check adjacent cells
+        if (i > 0 && mapIn.map[i - 1][j] == WALL) wallCount++; // Up
+        if (i < SIZE - 1 && mapIn.map[i + 1][j] == WALL) wallCount++; // Down
+        if (j > 0 && mapIn.map[i][j - 1] == WALL) wallCount++; // Left
+        if (j < SIZE - 1 && mapIn.map[i][j + 1] == WALL) wallCount++; // Right
+        if (wallCount == 4) {
+          mapIn.map[i][j] = WALL; // Convert isolated PATH to WALL
+        }
+      }
+    }
+  }
+  return 0;
+}
+
 int outputMap(Map mapIn) {
   for (int i = 0; i < SIZE; i++) {
     for (int j = 0; j < SIZE; j++) {
@@ -151,6 +173,7 @@ int main(int argc, char* argv[]){
   Map map;
   //random generation of the map
   generateRandomMap(map);
+  cleanUpMap(map);
   //debug code
   outputMap(map);
 
@@ -163,7 +186,17 @@ int main(int argc, char* argv[]){
   serverSocket = socket(AF_INET, SOCK_STREAM, 0); //TCP>UDP, only text
   bind(serverSocket, (struct sockaddr*)&serverAddr, sizeof(serverAddr));
   int opt=1;
+  //Reuseport consente di creare piu socket in listen sulla stessa coppia ip:porta
   setsockopt(serverSocket,SOL_SOCKET,SO_REUSEADDR,&opt,sizeof(opt));
+
+  listen(serverSocket, 5);
+
+  //Gestione multicast per aggionamento punteggi eventuale
+  struct ip_mreq mreq = {0};
+  mreq.imr_multiaddr.s_addr = inet_addr("239.255.0.1");
+  mreq.imr_interface.s_addr = htonl(INADDR_ANY);
+  int multicastSocket = socket(AF_INET, SOCK_DGRAM, 0);
+  setsockopt(multicastSocket, IPPROTO_IP, IP_ADD_MEMBERSHIP, &mreq, sizeof(mreq));
 
   return 0;
 }

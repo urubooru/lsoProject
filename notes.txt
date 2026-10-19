@@ -1,6 +1,5 @@
 TODO:
     Server: Numero di partite da lanciare, timeout sulle partite
-        Generazione mappa migliorata
         Aggiornamento posizione da un utente, inviagli una mappa locale
 
     Client: Tutto
