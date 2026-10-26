@@ -8,6 +8,7 @@
 #define WALL 0
 #define PATH 1
 #define SIZE 35
+#define PORT 5050 
 
 struct map {
   int map[SIZE][SIZE];
@@ -176,11 +177,11 @@ int main(int argc, char* argv[]){
   cleanUpMap(map);
   //debug code
   outputMap(map);
-  //create and bind socket to port 5050
+  //create and bind socket to port
   int serverSocket;
   struct sockaddr_in serverAddr={0};
   serverAddr.sin_family = AF_INET;
-  serverAddr.sin_port = htons(5050);
+  serverAddr.sin_port = htons(PORT);
   serverAddr.sin_addr.s_addr = htonl(INADDR_ANY);// TODO CHANGE THIS 
   //AND GET A HOSTNAME
   serverSocket = socket(AF_INET, SOCK_STREAM, 0); //TCP>UDP, only text
@@ -192,13 +193,6 @@ int main(int argc, char* argv[]){
   listen(serverSocket, 5);
   accept(serverSocket, NULL, NULL); //accept connection from client
   printf("Client connected\n");
-
-  //Gestione multicast per aggionamento punteggi eventuale
-  struct ip_mreq mreq = {0};
-  mreq.imr_multiaddr.s_addr = inet_addr("224.0.0.1");
-  mreq.imr_interface.s_addr = htonl(INADDR_ANY);
-  int multicastSocket = socket(AF_INET, SOCK_DGRAM, 0);
-  setsockopt(multicastSocket, IPPROTO_IP, IP_ADD_MEMBERSHIP, &mreq, sizeof(mreq));
 
   return 0;
 }

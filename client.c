@@ -1,8 +1,13 @@
+#define _GNU_SOURCE 1
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <sys/types.h>
+#include <netdb.h>
+
+#define PORT 5050
 
 int main(int argc, char* argv[]){
   if(argc != 2){
@@ -10,35 +15,48 @@ int main(int argc, char* argv[]){
     return -1;
   }
 
+  //resolve address
   printf("Connecting to %s...\n", argv[1]);
-  struct sockaddr_in serverAddr = {0};
-  serverAddr.sin_family = AF_INET;
-  serverAddr.sin_port = htons(5050);
-  if(inet_pton(AF_INET, argv[1], &serverAddr.sin_addr)<= 0){
+  struct addrinfo hints={0}, *res;
+  hints.ai_socktype=SOCK_STREAM;
+  hints.ai_family=AF_INET;
+  if(getaddrinfo(argv[1], PORT, &hints, &res) != 0){
     perror("Invalid address");
     return -1;
   }
-  int clientSocket = socket(AF_INET, SOCK_STREAM, 0);
-  if(connect(clientSocket, (struct sockaddr*)&serverAddr, sizeof(serverAddr)) < 0){
-    perror("Connection failed");
-    return -1;
-  }
 
-  //set up multicast socket for receiving score updates
-  int multicastSocket = socket(AF_INET, SOCK_DGRAM, 0);
-  struct sockaddr_in multicastAddr = {0};
-  multicastAddr.sin_family = AF_INET;
-  multicastAddr.sin_port = htons(5051);
-  if(inet_pton(AF_INET, "", &multicastAddr.sin_addr) <= 0){ // TODO: replace "" with actual multicast address
-    perror("Invalid multicast address");
+  //create and connect socket
+  int clientSocket = socket(AF_INET, SOCK_STREAM, 0);
+  if(connect(clientSocket, res->ai_addr, res->ai_addrlen) < 0){
+    perror("Connection failed");
+    freeaddrinfo(res);
+    close(clientSocket);
     return -1;
   }
-  if(bind(multicastSocket, (struct sockaddr*)&multicastAddr, sizeof(multicastAddr)) < 0){
-    perror("Multicast bind failed");
-    return -1;
-  }
+  freeaddrinfo(res);
   printf("Connected to server\n");
 
+  //main loop
+  char buffer[1024];
+  int bytesReceived;
+  //printf("Use WASD to move or Q to quit:\n");
+  while(1){
+    //receive data from server
+    bytesReceived = recv(clientSocket, buffer, sizeof(buffer)-1, 0);
+    if(bytesReceived <= 0){
+      printf("Server disconnected\n");
+      break;
+    }
+    buffer[bytesReceived] = '\0';
+    printf("Server: %s\n", buffer);
+
+    //send data to server
+    printf("Enter command: ");
+    fgets(buffer, sizeof(buffer), stdin);
+    send(clientSocket, buffer, strlen(buffer), 0);
+  }
   
+  close(clientSocket);
+  printf("Client terminated\n");
   return 0;
 }
