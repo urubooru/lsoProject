@@ -6,8 +6,11 @@
 #include <arpa/inet.h>
 #include <sys/types.h>
 #include <netdb.h>
+#include <string.h>
+#include <unistd.h>
 
 #define PORT 5050
+#define PORTSTR "5050"
 
 int main(int argc, char* argv[]){
   if(argc != 2){
@@ -20,7 +23,8 @@ int main(int argc, char* argv[]){
   struct addrinfo hints={0}, *res;
   hints.ai_socktype=SOCK_STREAM;
   hints.ai_family=AF_INET;
-  if(getaddrinfo(argv[1], PORT, &hints, &res) != 0){
+  char port_str[6]=PORTSTR;
+  if(getaddrinfo(argv[1], port_str, &hints, &res) != 0){
     perror("Invalid address");
     return -1;
   }
@@ -36,9 +40,37 @@ int main(int argc, char* argv[]){
   freeaddrinfo(res);
   printf("Connected to server\n");
 
-  //main loop
+  //login or register
+  printf("Enter username:\n(if the username has not been registered it will create a new user)\n");
+  char username[16];
+  fgets(username, sizeof(username), stdin);
+  username[strcspn(username, "\n")] = 0; //remove newline
+  send(clientSocket, username, strlen(username), 0);
+  printf("Enter password:\n");
+  char password[16];
+  fgets(password, sizeof(password), stdin);
+  password[strcspn(password, "\n")] = 0; //remove newline
+  send(clientSocket, password, strlen(password), 0);
+
   char buffer[1024];
   int bytesReceived;
+  bytesReceived = recv(clientSocket, buffer, sizeof(buffer)-1, 0);
+  if(bytesReceived <= 0){
+    printf("Server disconnected\n");
+    close(clientSocket);
+    return -1;
+  }
+  buffer[bytesReceived] = '\0';
+  printf("Server: %s\n", buffer);
+  if(strcmp(buffer, "Success") != 0){
+    close(clientSocket);
+    return -1;
+  } else {
+    printf("Login/registration successful\n");
+  }
+  
+
+  //main loop
   //printf("Use WASD to move or Q to quit:\n");
   while(1){
     //receive data from server
@@ -49,6 +81,10 @@ int main(int argc, char* argv[]){
     }
     buffer[bytesReceived] = '\0';
     printf("Server: %s\n", buffer);
+    if(strcmp(buffer, "Game Over")==0){
+      printf("Game Over\n");
+      break;
+    }
 
     //send data to server
     printf("Enter command: ");

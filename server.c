@@ -4,6 +4,9 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <sys/time.h>
 
 #define WALL 0
 #define PATH 1
@@ -184,7 +187,7 @@ int main(int argc, char* argv[]){
   serverAddr.sin_port = htons(PORT);
   serverAddr.sin_addr.s_addr = htonl(INADDR_ANY);// TODO CHANGE THIS 
   //AND GET A HOSTNAME
-  serverSocket = socket(AF_INET, SOCK_STREAM, 0); //TCP>UDP, only text
+  serverSocket = socket(AF_INET, SOCK_STREAM, 0);
   bind(serverSocket, (struct sockaddr*)&serverAddr, sizeof(serverAddr));
   int opt=1;
   //Reuseport consente di creare piu socket in listen sulla stessa coppia ip:porta
@@ -193,6 +196,15 @@ int main(int argc, char* argv[]){
   listen(serverSocket, 5);
   accept(serverSocket, NULL, NULL); //accept connection from client
   printf("Client connected\n");
+
+  struct timeval tv;
+  tv.tv_sec = 15;  // 15 seconds timeout
+  tv.tv_usec = 0;
+  setsockopt(serverSocket, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
+  while(1){
+   send(serverSocket, "Success", 7, 0);
+   printf("in while loop\n");
+  }
 
   return 0;
 }
