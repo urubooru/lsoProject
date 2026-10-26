@@ -38,5 +38,7 @@ int main(int argc, char* argv[]){
     return -1;
   }
   printf("Connected to server\n");
+
+  
   return 0;
 }
