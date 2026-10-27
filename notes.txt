@@ -1,5 +1,6 @@
 TODO:
-    Server: Numero di partite da lanciare, timeout sulle partite
+    Server: multiple connection from user?
+    add comments
         Aggiornamento posizione da un utente, inviagli una mappa locale
 
     Client: Tutto
@@ -12,3 +13,4 @@ TODO:
         Mappa globale inviata dal server periodicamente
 
 Error handling
+update most print and gets etc.. to write and read syscalls
