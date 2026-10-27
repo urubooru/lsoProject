@@ -9,23 +9,23 @@
 #include <string.h>
 #include <unistd.h>
 
-#define PORT 5050
-#define PORTSTR "5050"
-
 int main(int argc, char* argv[]){
-  if(argc != 2){
-    printf("Usage: %s <ip/hostname>\n", argv[0]);
+  if(argc != 3){
+    printf("Usage: %s <ip/hostname> <port>\n", argv[0]);
     return -1;
   }
+
+  int PORT = atoi(argv[2]);
+  char PORTSTR[6];
+  strcpy(PORTSTR,argv[3]);
 
   //resolve address
   printf("Connecting to %s...\n", argv[1]);
   struct addrinfo hints={0}, *res;
   hints.ai_socktype=SOCK_STREAM;
   hints.ai_family=AF_INET;
-  char port_str[6]=PORTSTR;
-  if(getaddrinfo(argv[1], port_str, &hints, &res) != 0){
-    perror("Invalid address");
+  if(getaddrinfo(argv[1], PORTSTR, &hints, &res) != 0){
+    printf("Invalid address");
     return -1;
   }
 
@@ -63,6 +63,7 @@ int main(int argc, char* argv[]){
   buffer[bytesReceived] = '\0';
   printf("Server: %s\n", buffer);
   if(strcmp(buffer, "Success") != 0){
+    printf("Wrong credentials\n");
     close(clientSocket);
     return -1;
   } else {
