@@ -1,0 +1,23 @@
+services:
+  server:
+    build:
+      dockerfile: server/Dockerfile
+    container_name: server_cont
+    command: ["./server.elf", "120"]
+    networks:
+      - miarete
+    ports:
+      - "5050:5050" # 5050 of host to 5050 of container
+    volumes:
+      - ./user.data:/dir/user.data
+  client:
+    build:
+      dockerfile: client/Dockerfile
+    container_name: client_cont
+    command: ["./client.elf", "server", "5050"]
+    depends_on:
+      - server
+    networks:
+      - miarete
+networks:
+  miarete:

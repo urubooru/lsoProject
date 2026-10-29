@@ -1,4 +1,2 @@
 TODO:
-  update most print and gets etc.. to write and read syscalls
-  dockerfile
   documentation

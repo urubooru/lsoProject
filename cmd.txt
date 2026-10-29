@@ -1,0 +1,14 @@
+sudo docker network create miarete
+
+sudo docker compose up --build -d server
+# builds the server service, -d detach mode
+
+sudo docker compose run --rm -it client
+# docker compose run client service and remove the container
+#(didnt seem to work for me)
+
+
+sudo docker container rm server_cont
+sudo docker container rm client_cont
+#OR
+sudo docker container prune

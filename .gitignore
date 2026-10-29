@@ -1,2 +1,4 @@
-client
-server
+client.elf
+server.elf
+/client/cmd
+/server/cmd
