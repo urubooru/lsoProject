@@ -1,16 +1,4 @@
 TODO:
-    Server: multiple connection from user?
-    add comments
-        Aggiornamento posizione da un utente, inviagli una mappa locale
-
-    Client: Tutto
-        Connessione al server
-        Registrazione/accesso al server
-        Spostarsi sulla mappa
-        Disconnettersi
-        Vedere lista utenti collegati
-        Visualizzare mappa locale
-        Mappa globale inviata dal server periodicamente
-
-Error handling
-update most print and gets etc.. to write and read syscalls
+  update most print and gets etc.. to write and read syscalls
+  dockerfile
+  documentation
