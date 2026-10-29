@@ -360,7 +360,7 @@ int main(int argc, char* argv[]){
   char buf5[]="Server: ";
   const char newLine = '\n';
   write(STDOUT_FILENO, buf5, sizeof(buf5));
-  write(STDOUT_FILENO, buffer, sizeof(buffer));
+  write(STDOUT_FILENO, buffer, strlen(buffer));
   write(STDOUT_FILENO, &newLine, sizeof(char));
   //printf("Server: %s\n", buffer);
   if(strcmp(buffer, "Success") != 0){
